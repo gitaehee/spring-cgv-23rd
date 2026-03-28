@@ -3,9 +3,9 @@ package com.ceos23.spring_boot.domain;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.Id;
 
 @Entity
 @Getter
@@ -22,5 +22,9 @@ public class Item {
     public Item(String name, int price) {
         this.name = name;
         this.price = price;
+    }
+
+    public static Item of(String name, int price) {
+        return new Item(name, price);
     }
 }

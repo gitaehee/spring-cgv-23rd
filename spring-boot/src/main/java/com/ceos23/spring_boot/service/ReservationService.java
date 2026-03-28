@@ -36,9 +36,14 @@ public class ReservationService {
         }
 
         // 2. 엔티티 조회
-        User user = userRepository.findById(userId).orElseThrow();
-        Screening screening = screeningRepository.findById(screeningId).orElseThrow();
-        Seat seat = seatRepository.findById(seatId).orElseThrow();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Screening screening = screeningRepository.findById(screeningId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SCREENING_NOT_FOUND));
+
+        Seat seat = seatRepository.findById(seatId)
+                .orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
 
         // 3. 저장
         Reservation reservation = new Reservation(user, screening, seat);
@@ -53,7 +58,7 @@ public class ReservationService {
         }
 
         if (!reservationRepository.existsById(reservationId)) {
-            throw new CustomException(ErrorCode.NOT_FOUND);
+            throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
         }
 
         reservationRepository.deleteById(reservationId);

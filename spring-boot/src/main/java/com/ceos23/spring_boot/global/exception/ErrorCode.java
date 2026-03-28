@@ -5,10 +5,21 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
 
-    NOT_FOUND(404, "NOT_FOUND", "데이터를 찾을 수 없습니다"),
-    BAD_REQUEST(400, "BAD_REQUEST", "잘못된 요청입니다"),
+    // 공통
     INTERNAL_ERROR(500, "INTERNAL_ERROR", "서버 에러입니다"),
 
+    // 잘못된 요청
+    BAD_REQUEST(400, "BAD_REQUEST", "잘못된 요청입니다"),
+    INVALID_INPUT_VALUE(400, "INVALID_INPUT_VALUE", "입력값이 올바르지 않습니다"),
+
+    // 조회 실패 (404)
+    USER_NOT_FOUND(404, "USER_NOT_FOUND", "유저를 찾을 수 없습니다"),
+    MOVIE_NOT_FOUND(404, "MOVIE_NOT_FOUND", "영화를 찾을 수 없습니다"),
+    SCREENING_NOT_FOUND(404, "SCREENING_NOT_FOUND", "상영 정보를 찾을 수 없습니다"),
+    SEAT_NOT_FOUND(404, "SEAT_NOT_FOUND", "좌석을 찾을 수 없습니다"),
+    RESERVATION_NOT_FOUND(404, "RESERVATION_NOT_FOUND", "예약을 찾을 수 없습니다"),
+
+    // 비즈니스 로직
     SEAT_ALREADY_RESERVED(400, "SEAT_ALREADY_RESERVED", "이미 예약된 좌석입니다");
 
     private final int status;
