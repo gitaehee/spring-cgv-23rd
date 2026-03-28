@@ -6,6 +6,7 @@ import com.ceos23.spring_boot.dto.MovieResponse;
 import com.ceos23.spring_boot.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -32,9 +33,10 @@ public class MovieController {
                 .toList();
     }
 
-    // 🎬 단건 조회
+    // 🎬 단건 조회 -> Entity그대로 반환되지 않게 바꿈
     @GetMapping("/{id}")
-    public MovieResponse getOne(@PathVariable Long id) {
-        return new MovieResponse(movieService.findById(id));
+    public ResponseEntity<MovieResponse> getOne(@PathVariable Long id) {
+        Movie movie = movieService.findById(id);
+        return ResponseEntity.ok(new MovieResponse(movie));
     }
 }

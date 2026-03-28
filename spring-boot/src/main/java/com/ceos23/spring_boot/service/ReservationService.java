@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -23,7 +22,12 @@ public class ReservationService {
     @Transactional
     public Reservation reserve(Long userId, Long screeningId, Long seatId) {
 
-        // 1. 좌석 중복 체크 (핵심🔥)
+        // 0. 잘못된 요청값 체크
+        if (userId <= 0 || screeningId <= 0 || seatId <= 0) {
+            throw new IllegalArgumentException("id는 양수여야 합니다.");
+        }
+
+        // 1. 좌석 중복 체크
         boolean exists = reservationRepository
                 .existsByScreeningIdAndSeatId(screeningId, seatId);
 
@@ -44,9 +48,14 @@ public class ReservationService {
     // ❌ 예매 취소
     @Transactional
     public void cancel(Long reservationId) {
-        if (!reservationRepository.existsById(reservationId)) {
-            throw new RuntimeException("예약 없음");
+        if (reservationId <= 0) {
+            throw new IllegalArgumentException("id는 양수여야 합니다.");
         }
+
+        if (!reservationRepository.existsById(reservationId)) {
+            throw new CustomException(ErrorCode.NOT_FOUND);
+        }
+
         reservationRepository.deleteById(reservationId);
     }
 }
