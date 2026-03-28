@@ -45,3 +45,9 @@ Delete
 
 ### 7️⃣ Service 계층의 단위 테스트를 진행해요
 <img src="/images/4_test.png" alt="테스트 완료">
+
+---
+
+(저번주에 이어서..)
+
+<img src="/images/0-1_new_erd.png" alt="ERD 새 다이어그램">

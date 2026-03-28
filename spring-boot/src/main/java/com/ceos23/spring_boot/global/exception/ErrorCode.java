@@ -15,12 +15,15 @@ public enum ErrorCode {
     // 조회 실패 (404)
     USER_NOT_FOUND(404, "USER_NOT_FOUND", "유저를 찾을 수 없습니다"),
     MOVIE_NOT_FOUND(404, "MOVIE_NOT_FOUND", "영화를 찾을 수 없습니다"),
+    THEATER_NOT_FOUND(404, "THEATER_NOT_FOUND", "영화관을 찾을 수 없습니다"),
+    FAVORITE_THEATER_NOT_FOUND(404, "FAVORITE_THEATER_NOT_FOUND", "찜한 영화관 정보를 찾을 수 없습니다"),
     SCREENING_NOT_FOUND(404, "SCREENING_NOT_FOUND", "상영 정보를 찾을 수 없습니다"),
     SEAT_NOT_FOUND(404, "SEAT_NOT_FOUND", "좌석을 찾을 수 없습니다"),
     RESERVATION_NOT_FOUND(404, "RESERVATION_NOT_FOUND", "예약을 찾을 수 없습니다"),
 
     // 비즈니스 로직
-    SEAT_ALREADY_RESERVED(400, "SEAT_ALREADY_RESERVED", "이미 예약된 좌석입니다");
+    SEAT_ALREADY_RESERVED(400, "SEAT_ALREADY_RESERVED", "이미 예약된 좌석입니다"),
+    FAVORITE_THEATER_ALREADY_EXISTS(400, "FAVORITE_THEATER_ALREADY_EXISTS", "이미 찜한 영화관입니다");
 
     private final int status;
     private final String code;
