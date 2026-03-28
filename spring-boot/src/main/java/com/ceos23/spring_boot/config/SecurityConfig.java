@@ -34,11 +34,11 @@ public class SecurityConfig {
                                 "/h2-console/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/auth/**",
-                                "/users/**",
-                                "/orders/**",
-                                "/movies/**",
-                                "/items/**"
+                                "/auth/**"
+                            //    "/users/**",
+                            //    "/orders/**",
+                            //    "/movies/**",
+                            //    "/items/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
