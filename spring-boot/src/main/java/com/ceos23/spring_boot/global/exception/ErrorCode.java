@@ -20,6 +20,8 @@ public enum ErrorCode {
     SCREENING_NOT_FOUND(404, "SCREENING_NOT_FOUND", "상영 정보를 찾을 수 없습니다"),
     SEAT_NOT_FOUND(404, "SEAT_NOT_FOUND", "좌석을 찾을 수 없습니다"),
     RESERVATION_NOT_FOUND(404, "RESERVATION_NOT_FOUND", "예약을 찾을 수 없습니다"),
+    FAVORITE_MOVIE_NOT_FOUND(404, "FAVORITE_MOVIE_NOT_FOUND", "찜한 영화 정보를 찾을 수 없습니다"),
+    FAVORITE_MOVIE_ALREADY_EXISTS(400, "FAVORITE_MOVIE_ALREADY_EXISTS", "이미 찜한 영화입니다"),
 
     // 비즈니스 로직
     SEAT_ALREADY_RESERVED(400, "SEAT_ALREADY_RESERVED", "이미 예약된 좌석입니다"),
