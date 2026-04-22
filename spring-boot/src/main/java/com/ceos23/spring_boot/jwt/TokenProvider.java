@@ -88,7 +88,7 @@ public class TokenProvider implements InitializingBean {
 
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
-                token,
+                null,
                 userDetails.getAuthorities()
         );
     }

@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class AuthService {
     private final TokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public SignUpResponse signUp(SignUpRequest request) {
         validateSignUpRequest(request);
 
