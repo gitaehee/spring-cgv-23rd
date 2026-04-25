@@ -1,29 +1,40 @@
 package com.ceos23.spring_boot.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) // IDENTITY로 변경
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Screening screening;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Seat seat;
 
-    public Reservation(User user, Screening screening, Seat seat) {
+    private Reservation(User user, Screening screening, Seat seat) {
         this.user = user;
         this.screening = screening;
         this.seat = seat;
+    }
+
+    public static Reservation create(User user, Screening screening, Seat seat) {
+        return new Reservation(user, screening, seat);
     }
 }

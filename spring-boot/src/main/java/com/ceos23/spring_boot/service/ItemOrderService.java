@@ -1,12 +1,20 @@
 package com.ceos23.spring_boot.service;
 
-import com.ceos23.spring_boot.domain.*;
+import com.ceos23.spring_boot.domain.Item;
+import com.ceos23.spring_boot.domain.ItemOrder;
+import com.ceos23.spring_boot.domain.Theater;
+import com.ceos23.spring_boot.domain.TheaterItemStock;
+import com.ceos23.spring_boot.domain.User;
 import com.ceos23.spring_boot.dto.ItemOrderRequest;
 import com.ceos23.spring_boot.dto.ItemOrderResponse;
 import com.ceos23.spring_boot.dto.OrderItemRequest;
 import com.ceos23.spring_boot.exception.CustomException;
 import com.ceos23.spring_boot.global.exception.ErrorCode;
-import com.ceos23.spring_boot.repository.*;
+import com.ceos23.spring_boot.repository.ItemOrderRepository;
+import com.ceos23.spring_boot.repository.ItemRepository;
+import com.ceos23.spring_boot.repository.TheaterItemStockRepository;
+import com.ceos23.spring_boot.repository.TheaterRepository;
+import com.ceos23.spring_boot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +28,6 @@ import java.util.List;
 public class ItemOrderService {
 
     private final ItemOrderRepository itemOrderRepository;
-    private final OrderDetailRepository orderDetailRepository;
     private final TheaterItemStockRepository theaterItemStockRepository;
     private final UserRepository userRepository;
     private final TheaterRepository theaterRepository;
@@ -30,49 +37,17 @@ public class ItemOrderService {
     public ItemOrderResponse orderItems(ItemOrderRequest request) {
         validateRequest(request);
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = loadUser(request.getUserId());
+        Theater theater = loadTheater(request.getTheaterId());
 
-        Theater theater = theaterRepository.findById(request.getTheaterId())
-                .orElseThrow(() -> new CustomException(ErrorCode.THEATER_NOT_FOUND));
-
-        List<TheaterItemStock> stocks = new ArrayList<>();
         List<Item> items = new ArrayList<>();
-        int totalPrice = 0;
+        List<TheaterItemStock> stocks = new ArrayList<>();
+        int totalPrice = calculateTotalPriceAndPrepareOrderItems(request, items, stocks);
 
-        for (OrderItemRequest orderItemRequest : request.getItems()) {
-            validateOrderItem(orderItemRequest);
-
-            Item item = itemRepository.findById(orderItemRequest.getItemId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
-
-            TheaterItemStock stock = theaterItemStockRepository
-                    .findByTheaterIdAndItemId(request.getTheaterId(), orderItemRequest.getItemId())
-                    .orElseThrow(() -> new CustomException(ErrorCode.ITEM_STOCK_NOT_FOUND));
-
-            if (stock.getStock() < orderItemRequest.getCount()) {
-                throw new CustomException(ErrorCode.INSUFFICIENT_STOCK);
-            }
-
-            items.add(item);
-            stocks.add(stock);
-            totalPrice += item.getPrice() * orderItemRequest.getCount();
-        }
-
-        ItemOrder.of(user, theater, totalPrice)
+        ItemOrder itemOrder = createItemOrder(user, theater, totalPrice);
         ItemOrder savedOrder = itemOrderRepository.save(itemOrder);
 
-        for (int i = 0; i < request.getItems().size(); i++) {
-            OrderItemRequest orderItemRequest = request.getItems().get(i);
-            Item item = items.get(i);
-            TheaterItemStock stock = stocks.get(i);
-
-            stock.decreaseStock(orderItemRequest.getCount());
-
-            OrderDetail orderDetail = OrderDetail.of(savedOrder, item, orderItemRequest.getCount());
-            savedOrder.addOrderDetail(orderDetail);
-            orderDetailRepository.save(orderDetail);
-        }
+        addOrderDetailsAndDecreaseStock(savedOrder, request.getItems(), items, stocks);
 
         return ItemOrderResponse.from(savedOrder);
     }
@@ -88,14 +63,84 @@ public class ItemOrderService {
 
     public List<ItemOrderResponse> getOrdersByUser(Long userId) {
         validateId(userId);
-
-        if (!userRepository.existsById(userId)) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
-        }
+        validateUserExists(userId);
 
         return itemOrderRepository.findAllByUserId(userId).stream()
                 .map(ItemOrderResponse::from)
                 .toList();
+    }
+
+    private int calculateTotalPriceAndPrepareOrderItems(
+            ItemOrderRequest request,
+            List<Item> items,
+            List<TheaterItemStock> stocks
+    ) {
+        int totalPrice = 0;
+
+        for (OrderItemRequest orderItemRequest : request.getItems()) {
+            validateOrderItem(orderItemRequest);
+
+            Item item = loadItem(orderItemRequest.getItemId());
+            TheaterItemStock stock = loadStock(request.getTheaterId(), orderItemRequest.getItemId());
+
+            stock.ensureEnough(orderItemRequest.getCount());
+
+            items.add(item);
+            stocks.add(stock);
+            totalPrice += calculateItemPrice(item, orderItemRequest.getCount());
+        }
+
+        return totalPrice;
+    }
+
+    private void addOrderDetailsAndDecreaseStock(
+            ItemOrder savedOrder,
+            List<OrderItemRequest> orderItemRequests,
+            List<Item> items,
+            List<TheaterItemStock> stocks
+    ) {
+        for (int i = 0; i < orderItemRequests.size(); i++) {
+            OrderItemRequest orderItemRequest = orderItemRequests.get(i);
+            Item item = items.get(i);
+            TheaterItemStock stock = stocks.get(i);
+
+            stock.decreaseStock(orderItemRequest.getCount());
+            savedOrder.addOrderDetail(item, orderItemRequest.getCount());
+        }
+    }
+
+    private User loadUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private Theater loadTheater(Long theaterId) {
+        return theaterRepository.findById(theaterId)
+                .orElseThrow(() -> new CustomException(ErrorCode.THEATER_NOT_FOUND));
+    }
+
+    private Item loadItem(Long itemId) {
+        return itemRepository.findById(itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ITEM_NOT_FOUND));
+    }
+
+    private TheaterItemStock loadStock(Long theaterId, Long itemId) {
+        return theaterItemStockRepository.findByTheaterIdAndItemId(theaterId, itemId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ITEM_STOCK_NOT_FOUND));
+    }
+
+    private int calculateItemPrice(Item item, Integer count) {
+        return item.getPrice() * count;
+    }
+
+    private ItemOrder createItemOrder(User user, Theater theater, int totalPrice) {
+        return ItemOrder.of(user, theater, totalPrice);
+    }
+
+    private void validateUserExists(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
     }
 
     private void validateRequest(ItemOrderRequest request) {
