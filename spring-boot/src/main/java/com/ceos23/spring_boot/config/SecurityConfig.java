@@ -1,5 +1,6 @@
 package com.ceos23.spring_boot.config;
 
+import com.ceos23.spring_boot.jwt.JwtAuthenticationEntryPoint;
 import com.ceos23.spring_boot.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -29,16 +31,19 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/h2-console/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/auth/**"
-                            //    "/users/**",
-                            //    "/orders/**",
-                            //    "/movies/**",
-                            //    "/items/**"
+                                //    "/users/**",
+                                //    "/orders/**",
+                                //    "/movies/**",
+                                //    "/items/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

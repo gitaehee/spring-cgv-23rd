@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -22,12 +21,6 @@ public class ReservationService {
     @Transactional
     public Reservation reserve(Long userId, Long screeningId, Long seatId) {
 
-        // 0. 잘못된 요청값 체크
-        if (userId <= 0 || screeningId <= 0 || seatId <= 0) {
-            throw new IllegalArgumentException("id는 양수여야 합니다.");
-        }
-
-        // 1. 좌석 중복 체크
         boolean exists = reservationRepository
                 .existsByScreeningIdAndSeatId(screeningId, seatId);
 
@@ -35,7 +28,6 @@ public class ReservationService {
             throw new CustomException(ErrorCode.SEAT_ALREADY_RESERVED);
         }
 
-        // 2. 엔티티 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -45,7 +37,6 @@ public class ReservationService {
         Seat seat = seatRepository.findById(seatId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
 
-        // 3. 저장
         Reservation reservation = new Reservation(user, screening, seat);
         return reservationRepository.save(reservation);
     }
@@ -53,10 +44,6 @@ public class ReservationService {
     // ❌ 예매 취소
     @Transactional
     public void cancel(Long reservationId) {
-        if (reservationId <= 0) {
-            throw new IllegalArgumentException("id는 양수여야 합니다.");
-        }
-
         if (!reservationRepository.existsById(reservationId)) {
             throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
         }
