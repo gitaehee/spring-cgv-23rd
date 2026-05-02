@@ -46,9 +46,9 @@ public enum ErrorCode {
     PAYMENT_NOT_FOUND(404, "PAYMENT_NOT_FOUND", "결제 정보를 찾을 수 없습니다"),
     PAYMENT_CONFLICT(409, "PAYMENT_CONFLICT", "결제 요청 상태가 충돌했습니다"),
     PAYMENT_SERVER_ERROR(502, "PAYMENT_SERVER_ERROR", "외부 결제 서버 오류가 발생했습니다"),
-    PAYMENT_RETRY_FAILED(502, "PAYMENT_RETRY_FAILED", "결제 재시도에 실패했습니다");
+    PAYMENT_RETRY_FAILED(502, "PAYMENT_RETRY_FAILED", "결제 재시도에 실패했습니다"),
 
-    INVALID_TOKEN_SUBJECT(401, "INVALID_TOKEN_SUBJECT", "토큰의 사용자 식별자가 올바르지 않습니다"),
+    INVALID_TOKEN_SUBJECT(401, "INVALID_TOKEN_SUBJECT", "토큰의 사용자 식별자가 올바르지 않습니다");
 
     private final int status;
     private final String code;
