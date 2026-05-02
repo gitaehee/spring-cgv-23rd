@@ -298,7 +298,7 @@ CEOS 23기 백엔드 스터디 - CGV 클론 코딩 프로젝트
 
 ### 프로젝트 마무리
 
-#### 진행 내용
+#### 1. 진행 내용
 
 * 외부 결제 API 연동 방식을 OpenFeign에서 RestClient로 변경했다.
 * RestClient의 `onStatus()`를 사용해 결제 API 응답 상태 코드별 예외 처리를 추가했다.
@@ -315,6 +315,30 @@ CEOS 23기 백엔드 스터디 - CGV 클론 코딩 프로젝트
 * JWT subject가 숫자가 아닐 경우를 대비해 `INVALID_TOKEN_SUBJECT` 예외 처리를 추가했다.
 * 좌석 예매 중복 방지를 위해 좌석 조회 시 `PESSIMISTIC_WRITE` 비관적 락을 적용했다.
 
+### 2. 수동 배포
 
+도커 이미지 생성
+<img src="/images/8-1_docker_images.png" alt="도커 이미지 생성">
+
+도커 허브에 올리기
+<img src="/images/8-2_docker_hub.png" alt="도커 허브에 올리기">
+
+ec2 접속
+<img src="/images/8-3_ec2.png" alt="ec2 접속">
+
+도커 컴포즈 방식으로 변경
+<img src="/images/8-4_docker_compose.png" alt="도커 컴포즈 방식으로 변경">
+
+### 3. CI/CD
+
+
+
+
+
+### 느낀 점
+* 팸키들을 폴더 내 ssh에 저장해두는 게 마음이 편해서 좋은 방법 같았다
+* EC2안에서 컨테이너가 생성이 잘 안 됐는데 arm이랑 x86 아키텍처가 맞지 않았던 문제였다
+  * -> 이미지 다시 만들면 해결 됨
+* 펨키 안 보이면 명령어로 `cat ~/.ssh/ceos-cgv-key.pem`
 
 </details>
