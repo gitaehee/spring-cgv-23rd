@@ -8,6 +8,7 @@ import com.ceos23.spring_boot.infra.payment.dto.PaymentAuthData;
 import com.ceos23.spring_boot.infra.payment.dto.PaymentData;
 import com.ceos23.spring_boot.infra.payment.dto.PaymentInstantRequest;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -28,7 +29,7 @@ public class PaymentRestClient {
                 .uri("/auth/{githubId}", githubId)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (request, response) -> {
-                    throw new CustomException(ErrorCode.PAYMENT_API_ERROR);
+                    throwPaymentException(response.getStatusCode());
                 })
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -43,11 +44,8 @@ public class PaymentRestClient {
                 .header("Authorization", authorization)
                 .body(request)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, (httpRequest, response) -> {
-                    throw new CustomException(ErrorCode.PAYMENT_BAD_REQUEST);
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, (httpRequest, response) -> {
-                    throw new CustomException(ErrorCode.PAYMENT_SERVER_ERROR);
+                .onStatus(HttpStatusCode::isError, (httpRequest, response) -> {
+                    throwPaymentException(response.getStatusCode());
                 })
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -57,11 +55,8 @@ public class PaymentRestClient {
                 .uri("/payments/{paymentId}/cancel", paymentId)
                 .header("Authorization", authorization)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, (httpRequest, response) -> {
-                    throw new CustomException(ErrorCode.PAYMENT_BAD_REQUEST);
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, (httpRequest, response) -> {
-                    throw new CustomException(ErrorCode.PAYMENT_SERVER_ERROR);
+                .onStatus(HttpStatusCode::isError, (httpRequest, response) -> {
+                    throwPaymentException(response.getStatusCode());
                 })
                 .body(new ParameterizedTypeReference<>() {});
     }
@@ -71,12 +66,29 @@ public class PaymentRestClient {
                 .uri("/payments/{paymentId}", paymentId)
                 .header("Authorization", authorization)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, (httpRequest, response) -> {
-                    throw new CustomException(ErrorCode.PAYMENT_NOT_FOUND);
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, (httpRequest, response) -> {
-                    throw new CustomException(ErrorCode.PAYMENT_SERVER_ERROR);
+                .onStatus(HttpStatusCode::isError, (httpRequest, response) -> {
+                    throwPaymentException(response.getStatusCode());
                 })
                 .body(new ParameterizedTypeReference<>() {});
+    }
+
+    private void throwPaymentException(HttpStatusCode statusCode) {
+        if (statusCode == HttpStatus.FORBIDDEN) {
+            throw new CustomException(ErrorCode.PAYMENT_FORBIDDEN);
+        }
+
+        if (statusCode == HttpStatus.NOT_FOUND) {
+            throw new CustomException(ErrorCode.PAYMENT_NOT_FOUND);
+        }
+
+        if (statusCode == HttpStatus.CONFLICT) {
+            throw new CustomException(ErrorCode.PAYMENT_CONFLICT);
+        }
+
+        if (statusCode.is5xxServerError()) {
+            throw new CustomException(ErrorCode.PAYMENT_SERVER_ERROR);
+        }
+
+        throw new CustomException(ErrorCode.PAYMENT_API_ERROR);
     }
 }

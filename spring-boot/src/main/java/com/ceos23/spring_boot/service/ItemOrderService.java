@@ -20,6 +20,9 @@ import com.ceos23.spring_boot.repository.TheaterItemStockRepository;
 import com.ceos23.spring_boot.repository.TheaterRepository;
 import com.ceos23.spring_boot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,11 +73,28 @@ public class ItemOrderService {
             addOrderDetailsAndDecreaseStock(savedOrder, request.getItems(), items, stocks);
             savedOrder.markPaid(paymentId, resolvePaidAt(payment));
 
-        } catch (Exception e) {
+        } catch (CustomException e) {
             savedOrder.markPaymentFailed(paymentId);
+            handlePaymentException(e);
+
+        } catch (CannotAcquireLockException | PessimisticLockingFailureException e) {
+            savedOrder.markPaymentFailed(paymentId);
+            throw new CustomException(ErrorCode.ITEM_ORDER_LOCK_FAILED);
+
+        } catch (DataAccessException e) {
+            savedOrder.markPaymentFailed(paymentId);
+            throw new CustomException(ErrorCode.ITEM_ORDER_DB_ERROR);
         }
 
         return ItemOrderResponse.from(savedOrder);
+    }
+
+    private void handlePaymentException(CustomException e) {
+        if (e.getErrorCode() == ErrorCode.PAYMENT_SERVER_ERROR) {
+            throw new CustomException(ErrorCode.PAYMENT_RETRY_FAILED);
+        }
+
+        throw e;
     }
 
     public ItemOrderResponse getOrder(Long orderId) {
@@ -203,8 +223,8 @@ public class ItemOrderService {
     }
 
     private LocalDateTime resolvePaidAt(PaymentData payment) {
-        if (payment.getPaidAt() != null) {
-            return payment.getPaidAt();
+        if (payment.paidAt() != null) {
+            return payment.paidAt();
         }
 
         return LocalDateTime.now();

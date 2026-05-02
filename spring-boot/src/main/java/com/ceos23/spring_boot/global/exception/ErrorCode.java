@@ -27,6 +27,8 @@ public enum ErrorCode {
     ITEM_NOT_FOUND(404, "ITEM_NOT_FOUND", "상품을 찾을 수 없습니다"),
     ITEM_STOCK_NOT_FOUND(404, "ITEM_STOCK_NOT_FOUND", "해당 영화관의 상품 재고를 찾을 수 없습니다"),
     ITEM_ORDER_NOT_FOUND(404, "ITEM_ORDER_NOT_FOUND", "주문 정보를 찾을 수 없습니다"),
+    ITEM_ORDER_LOCK_FAILED(409, "ITEM_ORDER_LOCK_FAILED", "주문 처리 중 재고 락 획득에 실패했습니다"),
+    ITEM_ORDER_DB_ERROR(500, "ITEM_ORDER_DB_ERROR", "주문 저장 중 데이터베이스 오류가 발생했습니다"),
 
     // 비즈니스 로직
     SEAT_ALREADY_RESERVED(400, "SEAT_ALREADY_RESERVED", "이미 예약된 좌석입니다"),
@@ -34,9 +36,11 @@ public enum ErrorCode {
 
     // 외부 결제 API
     PAYMENT_API_ERROR(500, "PAYMENT_API_ERROR", "결제 API 호출 중 오류가 발생했습니다"),
-    PAYMENT_BAD_REQUEST(400, "PAYMENT_BAD_REQUEST", "결제 요청이 올바르지 않습니다"),
+    PAYMENT_FORBIDDEN(403, "PAYMENT_FORBIDDEN", "결제 API 접근 권한이 없습니다"),
     PAYMENT_NOT_FOUND(404, "PAYMENT_NOT_FOUND", "결제 정보를 찾을 수 없습니다"),
-    PAYMENT_SERVER_ERROR(502, "PAYMENT_SERVER_ERROR", "외부 결제 서버 오류가 발생했습니다");
+    PAYMENT_CONFLICT(409, "PAYMENT_CONFLICT", "결제 요청 상태가 충돌했습니다"),
+    PAYMENT_SERVER_ERROR(502, "PAYMENT_SERVER_ERROR", "외부 결제 서버 오류가 발생했습니다"),
+    PAYMENT_RETRY_FAILED(502, "PAYMENT_RETRY_FAILED", "결제 재시도에 실패했습니다");
 
     private final int status;
     private final String code;
