@@ -18,7 +18,6 @@ import com.ceos23.spring_boot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +53,7 @@ public class ItemOrderTransactionService {
 
             return savedOrder;
 
-        } catch (CannotAcquireLockException | PessimisticLockingFailureException e) {
+        } catch (PessimisticLockingFailureException e) {
             throw new CustomException(ErrorCode.ITEM_ORDER_LOCK_FAILED);
 
         } catch (DataAccessException e) {
