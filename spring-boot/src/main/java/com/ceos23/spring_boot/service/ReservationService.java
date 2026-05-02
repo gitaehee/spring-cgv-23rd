@@ -165,7 +165,7 @@ public class ReservationService {
     }
 
     private Seat loadSeat(Long seatId) {
-        return seatRepository.findById(seatId)
+        return seatRepository.findWithLockById(seatId)
                 .orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
     }
 
