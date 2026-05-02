@@ -16,7 +16,7 @@ import com.ceos23.spring_boot.repository.TheaterItemStockRepository;
 import com.ceos23.spring_boot.repository.TheaterRepository;
 import com.ceos23.spring_boot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
