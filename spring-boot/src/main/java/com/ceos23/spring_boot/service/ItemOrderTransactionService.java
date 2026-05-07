@@ -17,6 +17,7 @@ import com.ceos23.spring_boot.repository.TheaterRepository;
 import com.ceos23.spring_boot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -36,7 +37,7 @@ public class ItemOrderTransactionService {
     private final TheaterRepository theaterRepository;
     private final ItemRepository itemRepository;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ItemOrder createOrderAndDecreaseStock(ItemOrderRequest request) {
         User user = loadUser(request.getUserId());
         Theater theater = loadTheater(request.getTheaterId());
@@ -51,14 +52,14 @@ public class ItemOrderTransactionService {
         return savedOrder;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ItemOrder markPaid(Long orderId, String paymentId, LocalDateTime paidAt) {
         ItemOrder itemOrder = loadOrder(orderId);
         itemOrder.markPaid(paymentId, paidAt);
         return itemOrder;
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void markPaymentFailedAndRestoreStock(Long orderId, String paymentId) {
         ItemOrder itemOrder = loadOrder(orderId);
 
@@ -66,7 +67,7 @@ public class ItemOrderTransactionService {
         itemOrder.markPaymentFailed(paymentId);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ItemOrder cancelOrder(Long orderId) {
         ItemOrder itemOrder = loadOrder(orderId);
 
