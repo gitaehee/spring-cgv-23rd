@@ -16,8 +16,6 @@ import com.ceos23.spring_boot.repository.TheaterItemStockRepository;
 import com.ceos23.spring_boot.repository.TheaterRepository;
 import com.ceos23.spring_boot.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.PessimisticLockingFailureException;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,25 +38,17 @@ public class ItemOrderTransactionService {
 
     @Transactional
     public ItemOrder createOrderAndDecreaseStock(ItemOrderRequest request) {
-        try {
-            User user = loadUser(request.getUserId());
-            Theater theater = loadTheater(request.getTheaterId());
+        User user = loadUser(request.getUserId());
+        Theater theater = loadTheater(request.getTheaterId());
 
-            int totalPrice = calculateTotalPrice(request);
+        int totalPrice = calculateTotalPrice(request);
 
-            ItemOrder itemOrder = ItemOrder.of(user, theater, totalPrice);
-            ItemOrder savedOrder = itemOrderRepository.saveAndFlush(itemOrder);
+        ItemOrder itemOrder = ItemOrder.of(user, theater, totalPrice);
+        ItemOrder savedOrder = itemOrderRepository.saveAndFlush(itemOrder);
 
-            addOrderDetailsAndDecreaseStock(savedOrder, request);
+        addOrderDetailsAndDecreaseStock(savedOrder, request);
 
-            return savedOrder;
-
-        } catch (PessimisticLockingFailureException e) {
-            throw new CustomException(ErrorCode.ITEM_ORDER_LOCK_FAILED);
-
-        } catch (DataAccessException e) {
-            throw new CustomException(ErrorCode.ITEM_ORDER_DB_ERROR);
-        }
+        return savedOrder;
     }
 
     @Transactional
